@@ -9,6 +9,7 @@ module Hyper.Recurse
     , wrapM
     , unwrap
     , unwrapM
+    , unwrapM'
     , foldMapRecursive
     , HRecWitness (..)
     , (#>>)
@@ -58,6 +59,33 @@ unwrapM f x =
         >>= htraverse (Proxy @RTraversable #*# \w -> unwrapM (f . HRecSub w))
         <&> (_Pure #)
         \\ recurse (Proxy @(RTraversable h))
+
+data HRecWitness' h n where
+    HRecSelf' :: HRecWitness' h h
+    HRecSub' :: HRecWitness' h c -> HWitness c n -> HRecWitness' h n
+
+-- \| Monadically unwrap a tree from the top down, replacing its 'HyperType' with 'Pure'
+{-# INLINE unwrapM' #-}
+unwrapM' ::
+    forall m h w.
+    (Monad m, RTraversable h) =>
+    (forall n. HRecWitness' h n -> w # n -> m (n # w)) ->
+    w # h ->
+    m (Pure # h)
+unwrapM' f x =
+    go HRecSelf' x
+    where
+        go ::
+            forall h'.
+            RTraversable h' =>
+            HRecWitness' h h' ->
+            w # h' ->
+            m (Pure # h')
+        go hrw x = do
+            f hrw x
+                >>= (htraverse ((Proxy @RTraversable #*# \hwhn -> go (HRecSub' hrw hwhn))))
+                <&> (_Pure #)
+                \\ recurse (Proxy @(RTraversable h'))
 
 -- | Wrap a 'Pure' to a different 'HyperType' from the bottom up
 {-# INLINE wrap #-}

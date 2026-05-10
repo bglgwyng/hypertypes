@@ -232,6 +232,7 @@ benchmark hypertypes-bench
     , constraints
     , containers
     , criterion
+    , deepseq
     , generic-constraints
     , generic-data
     , hypertypes
