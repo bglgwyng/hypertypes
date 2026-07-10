@@ -38,6 +38,10 @@ class HNodes h => RNodes h where
 
 instance RNodes Pure
 instance RNodes (Const a)
+instance (RNodes a, RNodes b) => RNodes (a :*: b) where
+    recursiveHNodes _ = Dict \\ recursiveHNodes (Proxy @a) \\ recursiveHNodes (Proxy @b)
+instance (RNodes a, RNodes b) => RNodes (a :+: b) where
+    recursiveHNodes _ = Dict \\ recursiveHNodes (Proxy @a) \\ recursiveHNodes (Proxy @b)
 
 -- | Helper Proxy combinator that is useful in many instances of 'Recursive'
 proxyArgument :: proxy (f h :: Constraint) -> Proxy (h :: HyperType)
@@ -71,8 +75,11 @@ instance Recursive (Recursively c) where
 
 instance c Pure => Recursively c Pure
 instance c (Const a) => Recursively c (Const a)
+instance (Recursively c a, Recursively c b, c (a :*: b)) => Recursively c (a :*: b) where
+    recursively _ = Dict \\ recursively (Proxy @(c a)) \\ recursively (Proxy @(c b))
+instance (Recursively c a, Recursively c b, c (a :+: b)) => Recursively c (a :+: b) where
+    recursively _ = Dict \\ recursively (Proxy @(c a)) \\ recursively (Proxy @(c b))
 
--- | A class of 'HyperType's which recursively implement 'HTraversable'
 class (HTraversable h, Recursively HFunctor h, Recursively HFoldable h) => RTraversable h where
     recursiveHTraversable :: RecMethod RTraversable h
     {-# INLINE recursiveHTraversable #-}
@@ -81,6 +88,8 @@ class (HTraversable h, Recursively HFunctor h, Recursively HFoldable h) => RTrav
 
 instance RTraversable Pure
 instance RTraversable (Const a)
+instance (RTraversable a, RTraversable b) => RTraversable (a :+: b) where
+    recursiveHTraversable _ = Dict \\ recursiveHTraversable (Proxy @a) \\ recursiveHTraversable (Proxy @b)
 
 instance Recursive RTraversable where
     {-# INLINE recurse #-}

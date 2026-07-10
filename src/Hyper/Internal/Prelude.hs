@@ -17,7 +17,7 @@ import Data.Map as X (Map)
 import Data.Maybe as X (fromMaybe)
 import Data.Proxy as X (Proxy (..))
 import Data.Set as X (Set)
-import GHC.Generics as X (Generic, (:*:) (..))
+import GHC.Generics as X (Generic, (:*:) (..), (:+:) (..))
 import Generics.Constraints (makeDerivings, makeInstances)
 import Language.Haskell.TH (DecsQ, Name)
 
