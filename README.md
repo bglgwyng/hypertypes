@@ -71,7 +71,7 @@ Is there a way to use a single type parameter for both types of fields? Yes, the
 
 ### `(Type -> Type) -> Type`: Higher-Kinded Data
 
-The ["Higher-Kinded Data"](https://reasonablypolymorphic.com/blog/higher-kinded-data/) pattern represents `Person` like so:
+The ["Higher-Kinded Data"](https://reasonablypolymorphic.com/blog/higher-kinded-data/)/["barbies"](https://hackage.haskell.org/package/barbies) pattern represents `Person` like so:
 
 ```Haskell
 data Person f = Person
