@@ -13,7 +13,6 @@ module Hyper.Class.HasPlain
 
 import Control.Lens (Iso')
 import qualified Control.Lens as Lens
-import GHC.Generics as X ((:+:) (..))
 import Hyper.Internal.Prelude
 import Hyper.Type (type (#))
 import Hyper.Type.Pure (Pure (..), _Pure)

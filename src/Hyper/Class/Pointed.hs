@@ -3,7 +3,6 @@ module Hyper.Class.Pointed
     ( HPointed (..)
     ) where
 
-import GHC.Generics ((:+:) (..))
 import Hyper.Class.Nodes (HNodes, HWitness (..))
 import Hyper.Type (type (#))
 
