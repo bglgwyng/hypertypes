@@ -165,6 +165,7 @@ makeCtr top param (cName, _, cFields) =
                 _ -> forGen isTop (tiInstance x)
         forGen isTop t =
             case unapply t of
+                (ConT c, _) | c == top -> gen
                 (ConT c, args) ->
                     reify c
                         >>= \case
