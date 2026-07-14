@@ -87,7 +87,7 @@ makeCtr ::
     (Name, D.ConstructorVariant, [Either Type CtrTypePattern]) ->
     Q (Con, ClauseQ, ClauseQ, [Type])
 makeCtr top param (cName, _, cFields) =
-    traverse (forField True) cFields
+    traverse (forField [top] True) cFields
         <&> \xs ->
             let plainTypes = xs >>= plainFieldTypes
                 cVars = [0 :: Int ..] <&> mkName . ('x' :) . show & take (length plainTypes)
@@ -139,16 +139,16 @@ makeCtr top param (cName, _, cFields) =
                 & reverse
                 & (<> "P")
                 & mkName
-        forField _ (Left t) =
+        forField _ _ (Left t) =
             FieldInfo
                 <$> normalizeType t
                 ?? id
                 ?? id
                 <&> NodeField
-        forField isTop (Right x) = forPat isTop x
-        forPat isTop (Node x) = forGen isTop x
-        forPat isTop (GenEmbed x) = forGen isTop x
-        forPat _ (InContainer t p) =
+        forField seen isTop (Right x) = forPat seen isTop x
+        forPat seen _ (Node x) = forGen seen False x
+        forPat seen isTop (GenEmbed x) = forGen seen isTop x
+        forPat _ _ (InContainer t p) =
             FieldInfo
                 <$> [t|$(pure t) $(patType p)|]
                 ?? (\x -> [|(hPlain #) <$> $x|])
@@ -159,13 +159,13 @@ makeCtr top param (cName, _, cFields) =
                 patType (GenEmbed x) = [t|HPlain $(pure x)|]
                 patType (FlatEmbed x) = [t|HPlain $(pure (tiInstance x))|]
                 patType (InContainer t' p') = pure t' `appT` patType p'
-        forPat isTop (FlatEmbed x) =
+        forPat seen isTop (FlatEmbed x) =
             case tiConstructors x of
-                [(n, _, xs)] -> traverse (forField False) xs <&> FlatFields . FlatInfo isTop n
-                _ -> forGen isTop (tiInstance x)
-        forGen isTop t =
+                [(n, _, xs)] -> traverse (forField (tiName x : seen) False) xs <&> FlatFields . FlatInfo isTop n
+                _ -> forGen seen isTop (tiInstance x)
+        forGen seen isTop t =
             case unapply t of
-                (ConT c, _) | c == top -> gen
+                (ConT c, _) | c `elem` seen -> gen
                 (ConT c, args) ->
                     reify c
                         >>= \case
@@ -180,7 +180,7 @@ makeCtr top param (cName, _, cFields) =
                                     case D.datatypeCons inner of
                                         [x] ->
                                             traverse (matchType top param . D.applySubstitution subst) (D.constructorFields x)
-                                                >>= traverse (forField False)
+                                                >>= traverse (forField (c : seen) False)
                                                 <&> FlatFields . FlatInfo isTop (D.constructorName x)
                                         _ -> gen
                 _ -> gen
