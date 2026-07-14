@@ -42,8 +42,8 @@ instance (Show (HPlain (a :*: b)), HasHPlain a, HasHPlain b) => HasHPlain (a :*:
     data HPlain (a :*: b) = ProdP (HPlain a) (HPlain b)
     hPlain =
         Lens.iso
-        (\(ProdP a b) -> Pure (a ^. hPlain' :*: b ^. hPlain'))
-        (\(Pure (a :*: b)) -> ProdP (hPlain' # a) (hPlain' # b))
+            (\(ProdP a b) -> Pure (a ^. hPlain' :*: b ^. hPlain'))
+            (\(Pure (a :*: b)) -> ProdP (hPlain' # a) (hPlain' # b))
 
 deriving instance (Show (HPlain a), Show (HPlain b)) => Show (HPlain (a :*: b))
 
