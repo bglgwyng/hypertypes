@@ -15,6 +15,12 @@ newtype PureB h = PureB (h :# PureB)
     deriving stock (Generic)
 makeHasHPlain [''PureB]
 
+newtype HasPureC h = HasPureC (h :# PureC)
+    deriving stock (Generic)
+newtype PureC h = PureC (h :# PureC)
+    deriving stock (Generic)
+makeHasHPlain [''HasPureC, ''PureC]
+
 test :: TestTree
 test =
     do
