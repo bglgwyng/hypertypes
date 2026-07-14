@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module PlainTest where
 
 import Control.Lens
@@ -7,6 +10,10 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Prelude
+
+newtype PureB h = PureB (h :# PureB)
+    deriving stock (Generic)
+makeHasHPlain [''PureB]
 
 test :: TestTree
 test =
